@@ -1,7 +1,7 @@
 <script setup>
-import Home from './components/Home.vue'
+import Feedback from './views/Feedback.vue'
 </script>
 
 <template>
-  <Home msg="Vite + Vue" />
+    <Feedback />
 </template>
