@@ -7,7 +7,7 @@ const config: Options = {
   dbName: "sqlite.db",
   // folder-based discovery setup, using common filename suffix
   entities: ["dist/**/*.entity.js"],
-  entitiesTs: ["src/**/*.entity.ts"],
+  entitiesTs: ["**/*.entity.ts"],
   // we will use the ts-morph reflection, an alternative to the default reflect-metadata provider
   // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
   metadataProvider: TsMorphMetadataProvider,

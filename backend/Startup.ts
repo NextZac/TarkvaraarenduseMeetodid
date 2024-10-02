@@ -3,6 +3,7 @@ import * as path from "path";
 import formController from "./Controllers/Form";
 import apiController from "./Controllers/Api";
 import adminController from "./Controllers/Admin";
+import { MikroORM } from "@mikro-orm/sqlite";
 
 export default class Startup {
   app: any;
@@ -12,11 +13,11 @@ export default class Startup {
   }
 
   // Registers all middleware
-  public setup() {
+  public async setup() {
     this.app.use(express.json());
 
     // Serve static Vue files
-    this.app.use(express.static(path.join(__dirname, "dist")));
+    this.app.use(express.static(path.join(__dirname, "dist_front")));
 
     // Register controller routes
     this.app.use("/form", formController);

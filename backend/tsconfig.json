@@ -9,7 +9,9 @@
     "strict": true, // Enable strict type checking
     "moduleResolution": "node", // How modules are resolved, using Node.js resolution strategy
     "skipLibCheck": true, // Skips type checking of declaration files
-    "forceConsistentCasingInFileNames": true // Enforces consistent casing in file names
+    "forceConsistentCasingInFileNames": true, // Enforces consistent casing in file names
+    "declaration": true,
+    "experimentalDecorators": true
   },
   "include": [
     "./**/*.ts" // Include all TypeScript files in the project
