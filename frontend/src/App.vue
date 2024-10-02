@@ -3,5 +3,7 @@ import Feedback from './views/Feedback.vue'
 </script>
 
 <template>
-    <Feedback />
+    <div class="p-24 flex flex-col justify-center items-center">
+        <Feedback />
+    </div>
 </template>
