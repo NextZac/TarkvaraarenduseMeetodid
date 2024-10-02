@@ -11,7 +11,8 @@
     "skipLibCheck": true, // Skips type checking of declaration files
     "forceConsistentCasingInFileNames": true, // Enforces consistent casing in file names
     "declaration": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "noImplicitAny": false
   },
   "include": [
     "./**/*.ts" // Include all TypeScript files in the project

@@ -1,24 +1,18 @@
-import * as express from "express";
-import messageBiz from "../Biz/MessageBiz";
+import { Request, Response, NextFunction } from "express";
+import { MikroORM } from "@mikro-orm/core";
 
-const router = express.Router();
-
-// router.get("/", async (req, res) => {
-//   try {
-//     var biz = new messageBiz();
-//     var messages = await biz.getAllMessages();
-//     res.json(messages);
-//   } catch (err) {
-//     res.send("Error " + err);
-//   }
-// });
-
-router.get("/", async (req, res) => {
+export default async function formController(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  orm: MikroORM,
+) {
   try {
-    res.json("hello");
-  } catch (err) {
-    res.send("Error " + err);
-  }
-});
+    const em = orm.em.fork(); // Get an EntityManager
+    // Example usage of ORM to fetch data
 
-export default router;
+    res.json({ message: "API controller is working", data: [] });
+  } catch (error) {
+    next(error);
+  }
+}
