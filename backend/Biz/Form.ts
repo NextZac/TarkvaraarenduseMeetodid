@@ -3,10 +3,6 @@ import Startup from "./Startup";
 var CONFIG = require("../../config.json");
 
 export default class messageBiz {
-  constructor() {
-    //intialize cassandra
-  }
-
   public async getAllMessages() {
     var messages = await messageModel.find();
     return messages;

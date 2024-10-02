@@ -1,7 +1,6 @@
-import * as express from "express";
+import express from "express";
+import * as path from "path";
 import formController from "./Controllers/Form";
-import { open } from "sqlite";
-import sqlite3 from "sqlite3";
 
 export default class Startup {
   app: any;
@@ -10,23 +9,25 @@ export default class Startup {
     this.app = express();
   }
 
-  //Registers all middleware
+  // Registers all middleware
   public setup() {
     this.app.use(express.json());
-    //register controller routes
-    this.app.use("/form", messageController);
-  }
 
-  public async openDb() {
-    return open({
-      filename: "/tmp/database.db",
-      driver: sqlite3.Database,
+    // Serve static Vue files
+    this.app.use(express.static(path.join(__dirname, "dist")));
+
+    // Register controller routes
+    this.app.use("/form", formController);
+
+    // Catch-all route to serve Vue app
+    this.app.get("*", (req, res) => {
+      res.sendFile(path.join(__dirname, "dist", "index.html"));
     });
   }
 
-  //run the app on port
+  // Run the app on port
   public run(port) {
-    //starting app on server
+    // Start the app on server
     this.app.listen(port, () => {
       console.log("Server Started...");
     });
