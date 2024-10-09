@@ -38,7 +38,7 @@ export default class Startup {
 
     // Catch-all route to serve Vue app
     this.app.get("*", (req: any, res: any) => {
-      res.sendFile(path.join(__dirname, "dist", "index.html"));
+      res.sendFile(path.join(__dirname, "dist_front", "index.html"));
     });
   }
 
