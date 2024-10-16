@@ -7,7 +7,7 @@ import { MikroORM } from "@mikro-orm/sqlite";
 import ormConfig from "./mikro-orm.config";
 
 export default class Startup {
-  app: any;
+  app: express.Application; // Use explicit type for Express app
   orm: any;
 
   constructor() {
@@ -22,29 +22,39 @@ export default class Startup {
     // Serve static Vue files
     this.app.use(express.static(path.join(__dirname, "dist_front")));
 
-    // Register controller routes
-    this.app.use("/form", (req, res, next) =>
-      formController(req, res, next, this.orm),
-    );
-    this.app.use("/api/form", (req, res, next) =>
-      apiController(req, res, next, this.orm),
-    );
-    this.app.use("/api/form/:id", (req, res, next) =>
-      apiController(req, res, next, this.orm),
-    );
-    this.app.use("/admin", (req, res, next) =>
-      adminController(req, res, next, this.orm),
-    );
+    // Serve the Vue app for the form route
+    this.app.get("/form/:id", (req, res) => {
+      res.sendFile(path.join(__dirname, "dist_front", "index.html"));
+    });
 
-    // Catch-all route to serve Vue app
-    this.app.get("*", (req: any, res: any) => {
+    // Register API controller for form-related routes
+    // this.app.use("/api/form", (req, res, next) => {
+    //   apiController(req, res, next, this.orm);
+    // });
+
+    // Define specific route for getting a form by ID
+    this.app.get("/api/form/:id", (req, res, next) => {
+      return apiController(req, res, next, this.orm);
+    });
+
+    // Register controller for form handling
+    this.app.use("/form", (req, res, next) => {
+      formController(req, res, next, this.orm);
+    });
+
+    // Register admin routes
+    this.app.use("/admin", (req, res, next) => {
+      adminController(req, res, next, this.orm);
+    });
+
+    // Catch-all route to serve the Vue app for any other route
+    this.app.get("*", (req, res) => {
       res.sendFile(path.join(__dirname, "dist_front", "index.html"));
     });
   }
 
   // Run the app on port
   public run(port: number) {
-    // Start the app on server
     this.app.listen(port, () => {
       console.log("Server Started...");
       console.log(`Listening on port ${port}`);
