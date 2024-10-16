@@ -41,7 +41,7 @@ const buttonArr = ref([
       <slot />
     </p>
     <div class="flex gap-3">
-      <Ball v-for="(button, index) in buttonArr" :selected="button.selected" @click="buttonSelect(button, index); console.log(index)" :aria-checked="button.selected">
+      <Ball v-for="(button, index) in buttonArr" :selected="button.selected" @click="buttonSelect(button, index); console.log(index)" :aria-checked="button.selected" :id="index + 1">
         {{ button.name }}
       </Ball>
     </div>
