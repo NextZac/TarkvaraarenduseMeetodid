@@ -9,5 +9,5 @@ export class Form {
   FormName!: string;
 
   @Property()
-  form_data!: JSON;
+  form_data!: string;
 }
