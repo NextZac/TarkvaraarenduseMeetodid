@@ -1,14 +1,16 @@
 <script setup>
-import { ref } from 'vue';
 import BallSystem from '../components/BallSystem.vue'
 import InputSystem from '../components/InputSystem.vue';
 import Button from '../components/Button.vue';
+import BallSystem from "../components/BallSystem.vue";
+import InputSystem from "../components/InputSystem.vue";
+import Button from "../components/Button.vue";
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router"; // Use Vue Router for accessing route parameters
 import { watch } from "vue";
 
-const isSubmitted = ref(false)
+const form = ref(null);
 
 const questions = ref({
     id: 1,
@@ -31,44 +33,24 @@ const questions = ref({
     question: 'Mata',
 });
 
-const isQuestionAnswered = (questionId) => {
-    return true
-}
-
-function FormValitation(questions) {
+function FormValitation(questions){
     let response = [];
-const form = ref(null);
-const questions = ref([]);
 
-const route = useRoute();
+    questions.forEach((question) => {
+        let ballsContainer = document.getElementById(question.id + 'a');
 
-console.log(route);
+        try {
+            let ball = ballsContainer.querySelector("[type='button'][aria-checked='true']");
 
-const fetchFormData = async (formId) => {
-    try {
-        const response = await fetch(`/api/form/${formId}`);
-        const data = await response.json();
-        form.value = data.form_name; // assuming your API returns form_name
-        questions.value = data.questions; // assuming your API returns questions array
-    } catch (error) {
-        console.error("Error fetching form data:", error);
-    }
-};
+            let answer = ball.getAttribute('id');
 
-            if (ball != null) {
-                let answer = ball.getAttribute('id');
-
-                response.push({
-                    id: question.id,
-                    question: question.question,
-                    answer: answer
-                });
-
-                isSubmitted.value = true
-            }
+            response.push({
+                id: question.id,
+                question: question.question,
+                answer: answer
+            });
         } catch (error) {
             console.log(error);
-
         }
     });
 
@@ -80,7 +62,6 @@ const fetchFormData = async (formId) => {
 
     console.log(response);
 }
-const form = ref(null);
 
 const route = useRoute();
 
@@ -110,16 +91,20 @@ onMounted(() => {
 </script>
 
 <template>
+    <div class="flex flex-col gap-8 bg-white w-full h-full rounded-[10px] p-6 sm:p-16">
     <div
         class="flex flex-col gap-8 bg-white w-full h-full rounded-[10px] p-6 sm:p-16"
     >
         <p class="font-bold text-[32px]">Feedback</p>
 
-        <BallSystem :submitted="isSubmitted" :selected="isQuestionAnswered(question.id)" v-for="question in questions"
-            :id="question.id + 'a'">{{ question.question }}</BallSystem>
-
-        <InputSystem id="textField">Your thoughts</InputSystem>
-        <Button @click="FormValitation(questions)">Submit feedback</Button>
+        <BallSystem>How would you rate your experience?</BallSystem>
+        <BallSystem>How would you rate your experience?</BallSystem>
+        <BallSystem>How would you rate your experience?</BallSystem>
+        <BallSystem>How would you rate your experience?</BallSystem>
+        <BallSystem v-for="question in questions">{{
+            question.question
+        }}</BallSystem>
+        <InputSystem>Your thoughts</InputSystem>
+        <Button>Submit feedback</Button>
     </div>
 </template>
-
