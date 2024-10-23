@@ -2,40 +2,17 @@
 import BallSystem from "../components/BallSystem.vue";
 import InputSystem from "../components/InputSystem.vue";
 import Button from "../components/Button.vue";
-import BallSystem from "../components/BallSystem.vue";
-import InputSystem from "../components/InputSystem.vue";
-import Button from "../components/Button.vue";
 import axios from "axios";
 import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router"; // Use Vue Router for accessing route parameters
 import { watch } from "vue";
 
 const form = ref(null);
+const questions = ref([]);
+const textField = ref("");
 
-const questions = ref(
-    {
-        id: 1,
-        question: "Mata",
-    },
-    {
-        id: 2,
-        question: "Mata",
-    },
-    {
-        id: 3,
-        question: "Mata",
-    },
-    {
-        id: 4,
-        question: "Mata",
-    },
-    {
-        id: 5,
-        question: "Mata",
-    },
-);
-
-function FormValitation(questions) {
+async function FormValitation(questions) {
+    console.log(textField.value);
     let response = [];
 
     questions.forEach((question) => {
@@ -48,23 +25,39 @@ function FormValitation(questions) {
 
             let answer = ball.getAttribute("id");
 
-            response.push({
-                id: question.id,
-                question: question.question,
-                answer: answer,
-            });
+            if (answer != null) {
+                response.push({
+                    question: question.question,
+                    answer: answer,
+                });
+            }
         } catch (error) {
             console.log(error);
         }
     });
 
-    let textField = document.getElementById("textField");
-
     response.push({
-        textField: textField,
+        textField: textField.value,
     });
 
-    console.log(response);
+    try {
+        const resp = await fetch(
+            `http://localhost:8080/api/sendform/${route.params.id}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(response),
+            },
+        );
+        const data = await resp.json();
+        if (data["msg"] == "success") {
+            console.log("Success");
+        }
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 const route = useRoute();
@@ -73,7 +66,9 @@ console.log(route);
 
 const fetchFormData = async (formId) => {
     try {
-        const response = await fetch(`/api/form/${formId}`);
+        const response = await fetch(
+            `http://localhost:8080/api/form/${formId}`,
+        );
         const data = await response.json();
         form.value = data.form_name; // assuming your API returns form_name
         questions.value = data.questions; // assuming your API returns questions array
@@ -102,7 +97,7 @@ onMounted(() => {
         <BallSystem v-for="question in questions" :id="question.id + 'a'">{{
             question.question
         }}</BallSystem>
-        <InputSystem id="textField">Your thoughts</InputSystem>
+        <InputSystem v-model="textField">Your thoughts</InputSystem>
         <Button @click="FormValitation(questions)">Submit feedback</Button>
     </div>
 </template>

@@ -38,8 +38,8 @@ export default class Startup {
     });
 
     // Register controller for form handling
-    this.app.use("/form", (req, res, next) => {
-      formController(req, res, next, this.orm);
+    this.app.post("/api/sendform/:id", (req, res, next) => {
+      return formController(req, res, next, this.orm);
     });
 
     // Register admin routes

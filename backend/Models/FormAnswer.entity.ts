@@ -1,14 +1,14 @@
-import { Entity, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { Form } from "./Form.entity";
 @Entity()
 export class FormAnswer {
   @PrimaryKey()
   id!: number;
 
-  @Property()
-  answer!: string;
+  @Property({ type: "json" })
+  answer!: object;
 
-  @OneToOne()
+  @ManyToOne()
   form!: Form;
 
   @Property({ onUpdate: () => new Date() })
