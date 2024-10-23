@@ -53,7 +53,7 @@ function buttonSelect(button, index) {
     <p v-if="!selected & submitted" class="text-red-500 text-base">This field is required. Please fill it out.</p>
     </p>
     <div class="flex gap-3">
-      <Ball v-for="(button, index) in buttonArr" :selected="button.selected" @click="buttonSelect(button, index); console.log(index)" :aria-checked="button.selected" :id="index + 1">
+      <Ball v-for="(button, index) in buttonArr" :selected="button.selected" @click="buttonSelect(button, index)" :aria-checked="button.selected" :id="index + 1">
         {{ button.name }}
       </Ball>
     </div>
