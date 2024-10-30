@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { MikroORM } from "@mikro-orm/core";
+import { FormAnswer } from "../Models/FormAnswer.entity"; // Adjust the path to your entities
 
 export default async function adminController(
   req: Request,
@@ -8,10 +9,19 @@ export default async function adminController(
   orm: MikroORM,
 ) {
   try {
-    const em = orm.em.fork(); // Get an EntityManager
-    // Example usage of ORM to fetch data
+    console.log("Fetching answers...");
+    const em = orm.em.fork(); // Get a forked EntityManager for a new transaction
 
-    res.json({ message: "API controller is working", data: [] });
+    // Fetch all answers
+    const answers = await em.find(FormAnswer, {}); // Fetches all entries in the Answer table
+
+    // Format and send the JSON response
+    res.json(
+      answers.map((answer) => ({
+        question: answer.form,
+        answer: answer.answer,
+      })),
+    );
   } catch (error) {
     next(error);
   }

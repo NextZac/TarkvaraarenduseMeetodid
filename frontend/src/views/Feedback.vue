@@ -72,6 +72,7 @@ async function FormValitation(questions) {
     // Add text field response
     response.push({
         textField: textField.value,
+        textField: textField.value,
     });
 
     try {
@@ -109,9 +110,7 @@ const fetchFormData = async (formId) => {
     errorMessage.value = '';
 
     try {
-        const response = await fetch(
-            `http://localhost:8080/api/form/${formId}`
-        );
+        const response = await fetch(`/api/form/${formId}`);
         const data = await response.json();
         form.value = data.form_name;
         questions.value = data.questions;
