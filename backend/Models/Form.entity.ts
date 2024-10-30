@@ -2,7 +2,7 @@ import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 
 @Entity()
 export class Form {
-  @PrimaryKey()
+  @PrimaryKey({ autoincrement: true })
   id!: number;
 
   @Property()

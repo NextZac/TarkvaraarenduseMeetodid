@@ -5,9 +5,9 @@ import BallSystem from "../components/BallSystem.vue";
 import InputSystem from "../components/InputSystem.vue";
 import Button from "../components/Button.vue";
 
-// State Management
 const form = ref(null);
 const questions = ref([]);
+const answers = ref({});  // Track answers by question ID
 const textField = ref("");
 const isLoading = ref(false);
 const isSubmitting = ref(false);
@@ -18,27 +18,24 @@ const route = useRoute();
 // Computed Properties
 const isFormValid = computed(() => {
     if (!questions.value?.length) return false;
-
-    // Check if all questions have answers
-    const allQuestionsAnswered = questions.value.every((question, index) => {
-        const container = document.getElementById(index);
-        return container?.querySelector("[type='button'][aria-checked='true']");
-    });
-
-    return allQuestionsAnswered;
+    return questions.value.every(question => answers.value[question.id] !== undefined);
 });
 
 const unansweredQuestions = computed(() => {
     if (!questions.value) return [];
-
-    return questions.value.filter((question, index) => {
-        const container = document.getElementById(index);
-        return !container?.querySelector("[type='button'][aria-checked='true']");
-    });
+    return questions.value.filter(question => answers.value[question.id] === undefined);
 });
 
-// Form Submission
-async function FormValitation(questions) {
+const answeredCount = computed(() =>
+    questions.value.length - unansweredQuestions.value.length
+);
+
+// Handle answer updates from BallSystem
+const updateAnswer = (questionId, value) => {
+    answers.value[questionId] = value;
+};
+
+async function submitForm() {
     if (!isFormValid.value) {
         errorMessage.value = 'Please answer all questions before submitting';
         return;
@@ -48,50 +45,30 @@ async function FormValitation(questions) {
     errorMessage.value = '';
     successMessage.value = '';
 
-    let response = [];
+    const formData = questions.value.map(question => ({
+        question: question.question,
+        answer: answers.value[question.id]
+    }));
 
-    // Collect answers
-    questions.forEach((question, index) => {
-        let ballsContainer = document.getElementById(index);
-        try {
-            let ball = ballsContainer.querySelector(
-                "[type='button'][aria-checked='true']"
-            );
-            let answer = ball.getAttribute("id");
-            if (answer != null) {
-                response.push({
-                    question: question.question,
-                    answer: answer,
-                });
-            }
-        } catch (error) {
-            console.error("Error collecting answer:", error);
-        }
-    });
-
-    // Add text field response
-    response.push({
-        textField: textField.value,
-        textField: textField.value,
-    });
+    formData.push({ textField: textField.value });
 
     try {
-        const resp = await fetch(
+        const response = await fetch(
             `http://localhost:8080/api/sendform/${route.params.id}`,
             {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(response),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData),
             }
         );
-        const data = await resp.json();
+        const data = await response.json();
+        console.log(data);
 
-        if (data["msg"] === "success") {
+        if (data.message === "Form submitted successfully") {
             successMessage.value = "Thank you for your feedback!";
             setTimeout(() => {
                 successMessage.value = '';
+                resetForm();
             }, 3000);
         } else {
             errorMessage.value = "Failed to submit feedback. Please try again.";
@@ -104,38 +81,34 @@ async function FormValitation(questions) {
     }
 }
 
-// Fetch Form Data
 const fetchFormData = async (formId) => {
     isLoading.value = true;
     errorMessage.value = '';
+    answers.value = {};  // Reset answers when loading new form
 
     try {
-        const response = await fetch(`/api/form/${formId}`);
+        const response = await fetch(`http://localhost:8080/api/form/${formId}`);
         const data = await response.json();
         form.value = data.form_name;
         questions.value = data.questions;
     } catch (error) {
-        console.error("Error fetching form data:", error);
+        console.error("Error fetching form:", error);
         errorMessage.value = "Failed to load form. Please refresh the page.";
     } finally {
         isLoading.value = false;
     }
 };
 
-// Initialize form
+const resetForm = () => {
+    answers.value = {};
+    textField.value = ''
+    isSubmitting.value = false;
+};
+
 onMounted(() => {
     if (route.params.id) {
         fetchFormData(route.params.id);
     }
-
-    watch(
-        () => route.params.id,
-        (newId) => {
-            if (newId) {
-                fetchFormData(newId);
-            }
-        }
-    );
 });
 </script>
 
@@ -144,32 +117,28 @@ onMounted(() => {
         <div class="flex justify-between items-center">
             <p class="font-bold text-[32px]">Feedback</p>
 
-            <!-- Progress indicator -->
             <div v-if="questions.length" class="text-sm text-gray-600">
-                {{ questions.length - unansweredQuestions.length }}/{{ questions.length }} answered
+                {{ answeredCount }}/{{ questions.length }} answered
             </div>
         </div>
 
-        <!-- Loading State -->
         <div v-if="isLoading" class="flex justify-center py-8">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
 
-        <!-- Error Message -->
         <div v-if="errorMessage" class="bg-red-50 border-l-4 border-red-500 p-4 rounded" role="alert">
             <p class="text-red-700">{{ errorMessage }}</p>
         </div>
 
-        <!-- Success Message -->
         <div v-if="successMessage" class="bg-green-50 border-l-4 border-green-500 p-4 rounded" role="alert">
             <p class="text-green-700">{{ successMessage }}</p>
         </div>
 
-        <!-- Form Content -->
         <div v-if="!isLoading" class="space-y-8">
-            <BallSystem v-for="(question, index) in questions" :key="question.id" :id="index" :class="{
-                'border-l-4 border-yellow-400 pl-4': unansweredQuestions.includes(question)
-            }">
+            <BallSystem v-for="question in questions" :key="question.id" :questionId="question.id"
+                :value="answers[question.id]" @update:value="(val) => updateAnswer(question.id, val)" :class="{
+                    'border-l-4 border-yellow-400 pl-4': unansweredQuestions.includes(question)
+                }">
                 {{ question.question }}
             </BallSystem>
 
@@ -177,7 +146,7 @@ onMounted(() => {
                 Your thoughts
             </InputSystem>
 
-            <Button @click="FormValitation(questions)" :disabled="isSubmitting || !questions.length">
+            <Button @click="submitForm" :disabled="isSubmitting || !questions.length">
                 <template v-if="isSubmitting">
                     <span class="flex items-center justify-center">
                         <span class="animate-spin mr-2">⟳</span>

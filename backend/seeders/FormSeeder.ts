@@ -11,8 +11,9 @@ export class FormSeeder extends Seeder {
       FormName: "Form 1",
       form_data: {
         questions: [
-          { question: "Why do birds fly?" },
-          { question: "Why are you here?" },
+          { question: "Why do birds fly?", id: 0 },
+          { question: "Why are you here?", id: 1 },
+          { question: "Who are you?", id: 2 },
         ],
       },
     });

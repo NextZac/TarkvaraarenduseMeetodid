@@ -1,5 +1,5 @@
-import { Form } from "../Models/Form";
-import Startup from "./Startup";
+import { Form } from "../Models/Form.entity";
+import Startup from "../Startup";
 var CONFIG = require("../../config.json");
 
 export default class messageBiz {
