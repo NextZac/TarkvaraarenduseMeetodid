@@ -2,11 +2,10 @@
 import BallSystem from "../components/BallSystem.vue";
 import InputSystem from "../components/InputSystem.vue";
 import Button from "../components/Button.vue";
-import axios from "axios";
-import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router"; // Use Vue Router for accessing route parameters
-import { watch } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
 const form = ref(null);
 const questions = ref([]);
 const textField = ref("");
@@ -16,30 +15,29 @@ async function FormValitation(questions) {
     let response = [];
 
     questions.forEach((question) => {
-        let ballsContainer = document.getElementById(question.id + "a");
-
-        try {
-            let ball = ballsContainer.querySelector(
+        const ballsContainer = document.getElementById(question.id + "a");
+        if (ballsContainer) {
+            const ball = ballsContainer.querySelector(
                 "[type='button'][aria-checked='true']",
             );
-
-            let answer = ball.getAttribute("id");
-
-            if (answer != null) {
-                response.push({
-                    question: question.question,
-                    answer: answer,
-                });
+            if (ball) {
+                const answer = ball.getAttribute("id");
+                if (answer != null) {
+                    response.push({
+                        question: question.question,
+                        answer: answer,
+                    });
+                }
             }
-        } catch (error) {
-            console.log(error);
         }
     });
 
+    // Add text field response
     response.push({
         textField: textField.value,
     });
 
+    // Send the response
     try {
         const resp = await fetch(
             `http://localhost:8080/api/sendform/${route.params.id}`,
@@ -52,17 +50,13 @@ async function FormValitation(questions) {
             },
         );
         const data = await resp.json();
-        if (data["msg"] == "success") {
+        if (data["msg"] === "success") {
             console.log("Success");
         }
     } catch (error) {
-        console.log(error);
+        console.error("Error submitting form:", error);
     }
 }
-
-const route = useRoute();
-
-console.log(route);
 
 const fetchFormData = async (formId) => {
     try {
@@ -70,14 +64,15 @@ const fetchFormData = async (formId) => {
             `http://localhost:8080/api/form/${formId}`,
         );
         const data = await response.json();
-        form.value = data.form_name; // assuming your API returns form_name
-        questions.value = data.questions; // assuming your API returns questions array
+        form.value = data.form_name; // Ensure this matches your API's response
+        questions.value = data.questions; // Ensure this matches your API's response
     } catch (error) {
         console.error("Error fetching form data:", error);
     }
 };
 
 onMounted(() => {
+    fetchFormData(route.params.id);
     watch(
         () => route.params.id,
         (newId) => {
@@ -94,9 +89,13 @@ onMounted(() => {
         class="flex flex-col gap-8 bg-white w-full h-full rounded-[10px] p-6 sm:p-16"
     >
         <p class="font-bold text-[32px]">Feedback</p>
-        <BallSystem v-for="question in questions" :id="question.id + 'a'">{{
-            question.question
-        }}</BallSystem>
+        <BallSystem
+            v-for="question in questions"
+            :key="question.id"
+            :id="question.id + 'a'"
+        >
+            {{ question.question }}
+        </BallSystem>
         <InputSystem v-model="textField">Your thoughts</InputSystem>
         <Button @click="FormValitation(questions)">Submit feedback</Button>
     </div>
